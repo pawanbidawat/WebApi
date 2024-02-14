@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApiBeta.Data;
 using WebApiBeta.Models;
+using WebApiBeta.Services;
 
 namespace WebApiBeta.Controllers
 {
@@ -10,16 +11,19 @@ namespace WebApiBeta.Controllers
     public class ProductController : ControllerBase
     {
         private ProductDbContext _db;
-        public ProductController(ProductDbContext db)
+        private IProductService _productService;
+        public ProductController(ProductDbContext db , IProductService productService)
         {
             _db = db;
+            _productService = productService;
         }
 
-        [HttpGet]
-        public List<ProductEntity> GetProducts()
+        [HttpGet("GetAllProducts")]
+        public ActionResult GetProducts()
         {
-            return _db.Products.ToList();
+            return _productService.GetProduct();
         }
+     
 
         [HttpGet("GetProductDetail")]
         public ActionResult<ProductEntity> GetProductDetail(int id)
@@ -39,8 +43,8 @@ namespace WebApiBeta.Controllers
 
         }
 
-        [HttpPost]
-        public ActionResult<ProductEntity> AddProducts([FromBody] ProductEntity productEntity)
+        [HttpPost("AddProducts")]
+        public ActionResult<ProductEntity> AddProducts( ProductEntity productEntity)
         {
 
             if (!ModelState.IsValid)
@@ -48,8 +52,7 @@ namespace WebApiBeta.Controllers
                 return BadRequest();
 
             }
-            _db.Products.Add(productEntity);
-            _db.SaveChanges();
+           _productService.AddProduct(productEntity);
             return Ok(productEntity);
 
         }
@@ -64,24 +67,15 @@ namespace WebApiBeta.Controllers
                 return BadRequest();
 
             }
+            _productService.UpdateProduct(id, productEntity);
 
-            var product = _db.Products.FirstOrDefault(x => x.Id == id);
-            if (product == null)
-            { return NotFound(); }
-
-            product.Name = productEntity.Name;
-           
-            product.Price = productEntity.Price;
-
-            _db.Products.Add(productEntity);
-            _db.SaveChanges();
             return Ok(productEntity);
 
         }
 
         //Delete method 
-        [HttpDelete]
-        public ActionResult<ProductEntity> UpdateProducts(int id)
+        [HttpDelete ("Delete")]
+        public ActionResult<ProductEntity> DeleteProducts(int id)
         {
 
             if (!ModelState.IsValid)
@@ -90,15 +84,8 @@ namespace WebApiBeta.Controllers
 
             }
 
-            var product = _db.Products.FirstOrDefault(x => x.Id == id);
-            if (product == null)
-            { return NotFound(); }
-
-           
-
-            _db.Products.Remove(product);
-            _db.SaveChanges();
-            return NoContent();
+           var message = _productService.DeleteProduct(id);
+            return message;
 
         }
     }

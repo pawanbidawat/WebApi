@@ -5,8 +5,9 @@ namespace WebApiBeta.Services
 {
     public interface IProductService
     {
-        //ActionResult<ProductEntity> UpdateProduct(int id, ProductEntity productEntity);
-        //ActionResult<ProductEntity> AddProduct(ProductEntity productEntity);
+        ActionResult<ProductEntity> UpdateProduct(int id, ProductEntity productEntity);
+        ActionResult<ProductEntity> AddProduct(ProductEntity productEntity);
+        ActionResult DeleteProduct(int id);
 
         ActionResult GetProduct();
     }
